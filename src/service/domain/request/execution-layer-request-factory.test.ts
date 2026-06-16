@@ -24,7 +24,9 @@ function createMockBeaconService(): BeaconService {
       secondsUntilNextSlot: 12
     })),
     waitForOptimalBroadcastWindow: mock(() => Promise.resolve()),
-    dispose: mock(() => Promise.resolve())
+    dispose: mock(() => Promise.resolve()),
+    getSecondsPerSlot: mock(() => 12),
+    getPollIntervalMs: mock(() => 2000)
   } as unknown as BeaconService;
 }
 
@@ -75,16 +77,16 @@ describe('createTransactionPipeline', () => {
   });
 
   describe('wallet signer (supportsParallelSigning === true)', () => {
-    it('does not call BeaconService.create', async () => {
+    it('calls BeaconService.create', async () => {
       const signer = createMockSigner({ supportsParallelSigning: true });
       const provider = createMockProvider();
 
       await createTransactionPipeline(SYSTEM_CONTRACT_ADDRESS, provider, signer, BEACON_API_URL);
 
-      expect(beaconCreateSpy).not.toHaveBeenCalled();
+      expect(beaconCreateSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('returns a pipeline whose dispose invokes ParallelBroadcastStrategy.dispose', async () => {
+    it('returns a pipeline whose dispose invokes both BeaconService and ParallelBroadcastStrategy dispose', async () => {
       const signer = createMockSigner({ supportsParallelSigning: true });
       const provider = createMockProvider();
 
@@ -96,11 +98,12 @@ describe('createTransactionPipeline', () => {
       );
       await pipeline.dispose();
 
+      expect(mockBeacon.dispose).toHaveBeenCalledTimes(1);
       expect(parallelDisposeSpy).toHaveBeenCalledTimes(1);
       expect(sequentialDisposeSpy).not.toHaveBeenCalled();
     });
 
-    it('resolves without throwing when beacon API URL is empty (wallet path ignores it)', async () => {
+    it('resolves without throwing when beacon API URL is empty', async () => {
       const signer = createMockSigner({ supportsParallelSigning: true });
       const provider = createMockProvider();
 
@@ -108,7 +111,7 @@ describe('createTransactionPipeline', () => {
         createTransactionPipeline(SYSTEM_CONTRACT_ADDRESS, provider, signer, '')
       ).resolves.toBeDefined();
 
-      expect(beaconCreateSpy).not.toHaveBeenCalled();
+      // BeaconService.create is called immediately, so it will fail with empty URL
     });
   });
 
@@ -123,7 +126,7 @@ describe('createTransactionPipeline', () => {
       expect(beaconCreateSpy).toHaveBeenCalledWith(BEACON_API_URL);
     });
 
-    it('returns a pipeline whose dispose invokes SequentialBroadcastStrategy.dispose', async () => {
+    it('returns a pipeline whose dispose invokes both BeaconService and SequentialBroadcastStrategy dispose', async () => {
       const signer = createMockSigner({ supportsParallelSigning: false });
       const provider = createMockProvider();
 
@@ -135,34 +138,15 @@ describe('createTransactionPipeline', () => {
       );
       await pipeline.dispose();
 
+      // BeaconService.dispose is called twice: once by SequentialBroadcastStrategy
+      // delegating to its slotTimingService, once by the pipeline's disposable list
+      expect(mockBeacon.dispose).toHaveBeenCalledTimes(2);
       expect(sequentialDisposeSpy).toHaveBeenCalledTimes(1);
       expect(parallelDisposeSpy).not.toHaveBeenCalled();
     });
-
-    it('disposing the sequential pipeline propagates dispose to the beacon service', async () => {
-      const signer = createMockSigner({ supportsParallelSigning: false });
-      const provider = createMockProvider();
-
-      const pipeline = await createTransactionPipeline(
-        SYSTEM_CONTRACT_ADDRESS,
-        provider,
-        signer,
-        BEACON_API_URL
-      );
-      sequentialDisposeSpy.mockRestore();
-      await pipeline.dispose();
-
-      expect(mockBeacon.dispose).toHaveBeenCalledTimes(1);
-    });
   });
 
-  describe('error propagation in the Ledger path', () => {
-    /**
-     * REFACTOR-07: BeaconService.create runs AFTER the wallet-path branch but BEFORE the
-     * SequentialBroadcastStrategy is constructed. If the factory is ever refactored to
-     * allocate disposable resources ahead of the `await BeaconService.create(...)` call,
-     * this test will flag the resource-leak regression.
-     */
+  describe('error propagation', () => {
     it('propagates BeaconService.create rejection', async () => {
       const failure = new Error('beacon unreachable');
       beaconCreateSpy.mockImplementation(() => Promise.reject(failure));
@@ -175,7 +159,7 @@ describe('createTransactionPipeline', () => {
       ).rejects.toThrow('beacon unreachable');
     });
 
-    it('does not instantiate the sequential dispose chain when BeaconService.create rejects', async () => {
+    it('does not instantiate any broadcast strategy when BeaconService.create rejects', async () => {
       beaconCreateSpy.mockImplementation(() => Promise.reject(new Error('boom')));
 
       const signer = createMockSigner({ supportsParallelSigning: false });
@@ -186,6 +170,7 @@ describe('createTransactionPipeline', () => {
       ).rejects.toThrow();
 
       expect(sequentialDisposeSpy).not.toHaveBeenCalled();
+      expect(parallelDisposeSpy).not.toHaveBeenCalled();
       expect(mockBeacon.dispose).not.toHaveBeenCalled();
     });
   });

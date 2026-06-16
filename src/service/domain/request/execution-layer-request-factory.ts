@@ -17,7 +17,7 @@ import { TransactionReplacer } from './transaction-replacer';
 /**
  * Create a fully-wired TransactionPipeline with all dependencies
  *
- * Constructs the dependency graph: EthereumStateService, broadcast strategy selection,
+ * Constructs the dependency graph: BeaconService, EthereumStateService, broadcast strategy selection,
  * TransactionBroadcaster, TransactionMonitor, TransactionReplacer, and orchestrator.
  * Returns a pipeline that owns both the orchestrator and all disposable resources.
  *
@@ -37,15 +37,25 @@ export async function createTransactionPipeline(
   maxFee?: bigint,
   maxFeePerGasCap?: bigint
 ): Promise<TransactionPipeline> {
-  const ethereumStateService = new EthereumStateService(jsonRpcProvider, systemContractAddress);
   const logger = new TransactionProgressLogger();
   const disposables: Disposable[] = [];
+
+  const beaconService = await BeaconService.create(beaconApiUrl);
+  disposables.push(beaconService);
+
+  const pollIntervalMs = beaconService.getPollIntervalMs();
+  const ethereumStateService = new EthereumStateService(
+    jsonRpcProvider,
+    systemContractAddress,
+    pollIntervalMs
+  );
+  const transactionMonitor = new TransactionMonitor(jsonRpcProvider, undefined, pollIntervalMs);
 
   const broadcastStrategy = await createBroadcastStrategy(
     signer,
     ethereumStateService,
     systemContractAddress,
-    beaconApiUrl,
+    beaconService,
     logger,
     maxFee,
     maxFeePerGasCap
@@ -59,8 +69,6 @@ export async function createTransactionPipeline(
     logger,
     broadcastStrategy
   );
-
-  const transactionMonitor = new TransactionMonitor(jsonRpcProvider);
 
   const transactionReplacer = new TransactionReplacer(
     signer,
@@ -89,7 +97,7 @@ export async function createTransactionPipeline(
  * @param signer - Signer to check capabilities
  * @param ethereumStateService - Service for fetching contract fees (sequential only)
  * @param systemContractAddress - Target contract address (sequential only)
- * @param beaconApiUrl - Beacon API URL for slot timing (sequential only)
+ * @param beaconService - BeaconService for slot timing (sequential only)
  * @param logger - Logger for transaction progress
  * @param maxFee - Maximum contract fee in wei per request (sequential only)
  * @param maxFeePerGasCap - Maximum gas fee per gas in wei (sequential only)
@@ -99,7 +107,7 @@ async function createBroadcastStrategy(
   signer: ISigner,
   ethereumStateService: EthereumStateService,
   systemContractAddress: string,
-  beaconApiUrl: string,
+  beaconService: BeaconService,
   logger: TransactionProgressLogger,
   maxFee?: bigint,
   maxFeePerGasCap?: bigint
@@ -108,7 +116,6 @@ async function createBroadcastStrategy(
     return new ParallelBroadcastStrategy(logger);
   }
 
-  const beaconService = await BeaconService.create(beaconApiUrl);
   return new SequentialBroadcastStrategy(
     ethereumStateService,
     systemContractAddress,

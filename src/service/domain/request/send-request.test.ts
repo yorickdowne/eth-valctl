@@ -8,14 +8,26 @@ import { TransactionProgressLogger } from './transaction-progress-logger';
 
 const MOCK_GENESIS_TIME = 1606824023;
 
-const createMockFetchResponse = () => ({
+const createMockGenesisResponse = () => ({
   ok: true,
   status: 200,
   statusText: 'OK',
   json: () => Promise.resolve({ data: { genesis_time: String(MOCK_GENESIS_TIME) } })
 });
 
-const mockFetch = mock(() => Promise.resolve(createMockFetchResponse()));
+const createMockSpecResponse = () => ({
+  ok: true,
+  status: 200,
+  statusText: 'OK',
+  json: () => Promise.resolve({ data: { SECONDS_PER_SLOT: '12' } })
+});
+
+const mockFetch = mock((url: string) => {
+  if (url.includes('/eth/v1/config/spec')) {
+    return Promise.resolve(createMockSpecResponse());
+  }
+  return Promise.resolve(createMockGenesisResponse());
+});
 
 mock.module('undici', () => ({
   fetch: mockFetch
@@ -79,7 +91,8 @@ describe('Strategy Selection Logic', () => {
 
   describe('SequentialBroadcastStrategy', () => {
     it('has isParallel set to false', async () => {
-      mockFetch.mockResolvedValueOnce(createMockFetchResponse());
+      mockFetch.mockResolvedValueOnce(createMockGenesisResponse());
+      mockFetch.mockResolvedValueOnce(createMockSpecResponse());
 
       const mockProvider = createMockProvider();
       const beaconService = await BeaconService.create('http://localhost:5052');
@@ -108,13 +121,15 @@ describe('Strategy Selection Logic', () => {
   });
 
   describe('BeaconService initialization', () => {
-    it('fetches genesis time from beacon API', async () => {
-      mockFetch.mockResolvedValueOnce(createMockFetchResponse());
+    it('fetches genesis time and config spec from beacon API', async () => {
+      mockFetch.mockResolvedValueOnce(createMockGenesisResponse());
+      mockFetch.mockResolvedValueOnce(createMockSpecResponse());
 
       await BeaconService.create('http://localhost:5052');
 
-      expect(mockFetch).toHaveBeenCalledTimes(1);
+      expect(mockFetch).toHaveBeenCalledTimes(2);
       expect(mockFetch).toHaveBeenCalledWith('http://localhost:5052/eth/v1/beacon/genesis');
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:5052/eth/v1/config/spec');
     });
 
     it('is only needed for sequential strategy (Ledger)', async () => {

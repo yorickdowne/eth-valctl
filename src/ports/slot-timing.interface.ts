@@ -22,4 +22,20 @@ export interface ISlotTimingService extends Disposable {
    * right before a fee change.
    */
   waitForOptimalBroadcastWindow(): Promise<void>;
+
+  /**
+   * Get the beacon chain slot length in seconds
+   *
+   * @returns Slot duration in seconds
+   */
+  getSecondsPerSlot(): number;
+
+  /**
+   * Get the appropriate block-change polling interval in milliseconds
+   *
+   * Derived from slot length: 2000ms for slots > 6s, 1000ms for slots ≤ 6s.
+   *
+   * @returns Polling interval in milliseconds
+   */
+  getPollIntervalMs(): number;
 }

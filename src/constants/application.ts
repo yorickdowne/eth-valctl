@@ -44,10 +44,12 @@ export const WITHDRAWAL_CREDENTIALS_0x02 = '0x02';
 /** Beacon API endpoints */
 export const VALIDATOR_STATE_BEACON_API_ENDPOINT = '/eth/v1/beacon/states/head/validators/';
 export const GENESIS_BEACON_API_ENDPOINT = '/eth/v1/beacon/genesis';
+export const CONFIG_SPEC_BEACON_API_ENDPOINT = '/eth/v1/config/spec';
 
-/** Beacon chain timing constants */
-export const SECONDS_PER_SLOT = 12;
-export const SLOT_BOUNDARY_THRESHOLD = 10;
+/** Beacon chain timing constants (fallback defaults, overridden by config spec endpoint) */
+export const DEFAULT_SECONDS_PER_SLOT = 12;
+export const SLOT_BOUNDARY_BUFFER_SECONDS = 2;
+export const SHORT_SLOT_THRESHOLD = 6;
 
 /**
  * Buffer time in milliseconds after slot boundary to account for network propagation

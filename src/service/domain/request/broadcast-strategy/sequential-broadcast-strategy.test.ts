@@ -12,6 +12,8 @@ const createMockSlotTimingService = (): ISlotTimingService & {
     secondsUntilNextSlot: 12
   })),
   waitForOptimalBroadcastWindow: mock(() => Promise.resolve()),
+  getSecondsPerSlot: mock(() => 12),
+  getPollIntervalMs: mock(() => 2000),
   dispose: mock(() => Promise.resolve())
 });
 

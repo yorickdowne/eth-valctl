@@ -5,10 +5,10 @@ import { existsSync, readFileSync, statSync } from 'fs';
 
 import * as application from '../../constants/application';
 import * as logging from '../../constants/logging';
-import { formatFeeForDisplay } from '../../service/domain/request/transaction-progress-logger';
 import { SAFE_OPTION_REQUIRED_ERROR } from '../../constants/logging';
 import type { GlobalCliOptions } from '../../model/commander';
 import { networkConfig } from '../../network-config';
+import { formatFeeForDisplay } from '../../service/domain/request/transaction-progress-logger';
 
 /**
  * Check if json rpc url is correctly formatted

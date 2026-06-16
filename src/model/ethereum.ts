@@ -197,6 +197,15 @@ export interface GenesisResponse {
 }
 
 /**
+ * Beacon API config spec response structure
+ */
+export interface ConfigSpecResponse {
+  data: {
+    SECONDS_PER_SLOT?: string;
+  };
+}
+
+/**
  * Current slot position within the beacon chain
  */
 export interface SlotPosition {

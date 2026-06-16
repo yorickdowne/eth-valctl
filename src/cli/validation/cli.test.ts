@@ -7,8 +7,8 @@ import { join } from 'path';
 import { MAX_NUMBER_OF_REQUESTS_PER_BLOCK } from '../../constants/application';
 import * as logging from '../../constants/logging';
 import { SAFE_OPTION_REQUIRED_ERROR } from '../../constants/logging';
-import { formatFeeForDisplay } from '../../service/domain/request/transaction-progress-logger';
 import type { GlobalCliOptions } from '../../model/commander';
+import { formatFeeForDisplay } from '../../service/domain/request/transaction-progress-logger';
 import {
   parseAndValidateMaxFee,
   parseAndValidateMaxNumberOfRequestsPerBlock,

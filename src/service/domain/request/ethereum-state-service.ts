@@ -10,8 +10,8 @@ import {
   SYSTEM_CONTRACT_NOT_ACTIVATED_ERROR
 } from '../../../constants/logging';
 import type { ContractFeeState, MaxNetworkFees } from '../../../model/ethereum';
-import { TransactionProgressLogger } from './transaction-progress-logger';
 import { BlockchainStateError } from '../../../model/ethereum';
+import { TransactionProgressLogger } from './transaction-progress-logger';
 
 /**
  * Service for querying Ethereum state including block numbers, network fees, and contract fees.
@@ -25,7 +25,8 @@ export class EthereumStateService {
    */
   constructor(
     private readonly provider: JsonRpcProvider,
-    private readonly systemContractAddress: string
+    private readonly systemContractAddress: string,
+    private readonly blockPollIntervalMs: number = serviceConstants.TRANSACTION_RECEIPT_POLL_INTERVAL_MS
   ) {}
 
   /**
@@ -165,9 +166,7 @@ export class EthereumStateService {
    */
   private async waitForNextBlock(block: number): Promise<number> {
     while (true) {
-      await new Promise((resolve) =>
-        setTimeout(resolve, serviceConstants.TRANSACTION_RECEIPT_POLL_INTERVAL_MS)
-      );
+      await new Promise((resolve) => setTimeout(resolve, this.blockPollIntervalMs));
       const newBlock = await this.fetchBlockNumber();
       if (newBlock !== block) return newBlock;
     }
