@@ -1,4 +1,4 @@
-import { PREFIX_0x } from '../../constants/application';
+import { DEFAULT_MAX_FEE, PREFIX_0x } from '../../constants/application';
 import { SOURCE_VALIDATOR_0x00_CREDENTIALS_ERROR } from '../../constants/logging';
 import type { GlobalCliOptions } from '../../model/commander';
 import { executeRequestPipeline } from './execution-layer-request-pipeline';
@@ -20,10 +20,14 @@ export async function consolidate(
   globalOptions: GlobalCliOptions,
   sourceValidatorPubkeys: string[],
   targetValidatorPubkey: string,
-  skipTargetOwnershipCheck: boolean = false
+  skipTargetOwnershipCheck: boolean = false,
+  maxFee?: string
 ): Promise<void> {
+  const maxFeeBigInt = BigInt(maxFee ?? String(DEFAULT_MAX_FEE));
+
   await executeRequestPipeline({
     globalOptions,
+    maxFee: maxFeeBigInt,
     validatorPubkeys: sourceValidatorPubkeys,
     encodeRequestData: (pubkey) => createConsolidationRequestData(pubkey, targetValidatorPubkey),
     resolveContractAddress: (config) => config.consolidationContractAddress,

@@ -40,7 +40,8 @@ export class TransactionBatchOrchestrator {
     private readonly transactionBroadcaster: TransactionBroadcaster,
     private readonly transactionMonitor: TransactionMonitor,
     private readonly transactionReplacer: TransactionReplacer,
-    private readonly logger: TransactionProgressLogger
+    private readonly logger: TransactionProgressLogger,
+    private readonly maxFee?: bigint
   ) {}
 
   /**
@@ -121,7 +122,7 @@ export class TransactionBatchOrchestrator {
    */
   private async processBatch(batch: string[]): Promise<BatchProcessingResult> {
     const currentBlockNumber = await this.blockchainStateService.fetchBlockNumber();
-    const contractFee = await this.blockchainStateService.fetchContractFee();
+    const contractFee = await this.fetchContractFeeWithinMax();
     const broadcastResults = await this.transactionBroadcaster.broadcastExecutionLayerRequests(
       batch,
       contractFee,
@@ -280,7 +281,7 @@ export class TransactionBatchOrchestrator {
     };
 
     try {
-      const newContractFee = await this.blockchainStateService.fetchContractFee();
+      const newContractFee = await this.fetchContractFeeWithinMax();
       const replacerResult = await this.transactionReplacer.replaceTransactions(
         unresolvedTransactions,
         newContractFee,
@@ -375,5 +376,20 @@ export class TransactionBatchOrchestrator {
     await new Promise((resolve) =>
       setTimeout(resolve, serviceConstants.TRANSACTION_RETRY_DELAY_MS)
     );
+  }
+
+  /**
+   * Fetch the contract fee, waiting for it to be within the max fee limit
+   *
+   * If maxFee is not set, returns the current fee immediately.
+   * Otherwise loops until the contract fee drops to or below maxFee.
+   *
+   * @returns Contract fee within acceptable range
+   */
+  private async fetchContractFeeWithinMax(): Promise<bigint> {
+    if (this.maxFee === undefined) {
+      return this.blockchainStateService.fetchContractFee();
+    }
+    return this.blockchainStateService.waitForContractFee(this.maxFee);
   }
 }

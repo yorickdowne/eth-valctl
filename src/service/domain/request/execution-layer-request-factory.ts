@@ -25,13 +25,15 @@ import { TransactionReplacer } from './transaction-replacer';
  * @param jsonRpcProvider - JSON-RPC provider for blockchain interaction
  * @param signer - Signer for transaction signing (wallet or Ledger)
  * @param beaconApiUrl - Beacon API URL for slot-aware broadcasting (required for Ledger)
+ * @param maxFee - Maximum contract fee in wei per request (waits if exceeded)
  * @returns Pipeline ready to send execution layer requests and dispose resources
  */
 export async function createTransactionPipeline(
   systemContractAddress: string,
   jsonRpcProvider: JsonRpcProvider,
   signer: ISigner,
-  beaconApiUrl: string
+  beaconApiUrl: string,
+  maxFee?: bigint
 ): Promise<TransactionPipeline> {
   const ethereumStateService = new EthereumStateService(jsonRpcProvider, systemContractAddress);
   const logger = new TransactionProgressLogger();
@@ -42,7 +44,8 @@ export async function createTransactionPipeline(
     ethereumStateService,
     systemContractAddress,
     beaconApiUrl,
-    logger
+    logger,
+    maxFee
   );
   disposables.push(broadcastStrategy);
 
@@ -69,7 +72,8 @@ export async function createTransactionPipeline(
     transactionBroadcaster,
     transactionMonitor,
     transactionReplacer,
-    logger
+    logger,
+    maxFee
   );
 
   return new TransactionPipeline(orchestrator, disposables);
@@ -90,7 +94,8 @@ async function createBroadcastStrategy(
   ethereumStateService: EthereumStateService,
   systemContractAddress: string,
   beaconApiUrl: string,
-  logger: TransactionProgressLogger
+  logger: TransactionProgressLogger,
+  maxFee?: bigint
 ): Promise<IBroadcastStrategy> {
   if (signer.capabilities.supportsParallelSigning) {
     return new ParallelBroadcastStrategy(logger);
@@ -101,6 +106,7 @@ async function createBroadcastStrategy(
     ethereumStateService,
     systemContractAddress,
     beaconService,
-    logger
+    logger,
+    maxFee
   );
 }

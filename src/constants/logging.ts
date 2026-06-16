@@ -63,8 +63,12 @@ export const NONCE_CONSUMED_INFO = (nonce: number): string =>
   `Nonce ${nonce} consumed - execution layer request fulfilled by original or competing transaction`;
 export const MINED_EL_REQUEST_WITH_BLOCK_INFO = (hash: string, blockNumber: number): string =>
   `Mined execution layer request: ${hash} in block ${blockNumber}`;
-export const BROADCAST_START_SEQUENTIAL_INFO = (count: number, maxFeePerGasGwei: string): string =>
-  `📤 Broadcasting ${count} execution layer request${count > 1 ? 's' : ''} sequentially (max fee per gas: ${maxFeePerGasGwei} Gwei)...`;
+export const BROADCAST_START_SEQUENTIAL_INFO = (
+  count: number,
+  maxFeePerGasGwei: string,
+  contractFeeDisplay: string
+): string =>
+  `📤 Broadcasting ${count} execution layer request${count > 1 ? 's' : ''} sequentially (max fee per gas: ${maxFeePerGasGwei} Gwei, contract fee: ${contractFeeDisplay})...`;
 export const SLOT_BOUNDARY_WAIT_INFO = (secondsUntilNextSlot: number): string =>
   `⏳ Near slot boundary, waiting ${secondsUntilNextSlot}s for next slot...`;
 export const PROMPT_PRIVATE_KEY_INFO = 'Private key for 0x01 or 0x02 withdrawal credentials:';
@@ -74,14 +78,20 @@ export const EL_REQUEST_REVERTED_INFO = (transactionHash: string): string =>
   `Execution layer request ${transactionHash} was mined but REVERTED (likely due to incorrect fee)`;
 export const EL_REQUEST_REVERTED_SENDING_NEW_INFO = (transactionHash: string): string =>
   `Execution layer request ${transactionHash} was mined but REVERTED -> Sending new request`;
-export const BLOCK_CHANGE_INFO = (newBlock: number, pendingCount: number): string =>
-  `Replacing ${pendingCount} pending execution layer requests with updated fees for block ${newBlock}...`;
+export const BLOCK_CHANGE_INFO = (
+  newBlock: number,
+  pendingCount: number,
+  maxFeePerGasGwei: string,
+  contractFeeDisplay: string
+): string =>
+  `Replacing ${pendingCount} pending execution layer requests for block ${newBlock} (max fee per gas: ${maxFeePerGasGwei} Gwei, contract fee: ${contractFeeDisplay})...`;
 export const BROADCAST_START_INFO = (
   count: number,
   blockNumber: number,
-  maxFeePerGasGwei: string
+  maxFeePerGasGwei: string,
+  contractFeeDisplay: string
 ): string =>
-  `📤 Broadcasting ${count} execution layer requests targeting block ${blockNumber} (max fee per gas: ${maxFeePerGasGwei} Gwei)...`;
+  `📤 Broadcasting ${count} execution layer requests targeting block ${blockNumber} (max fee per gas: ${maxFeePerGasGwei} Gwei, contract fee: ${contractFeeDisplay})...`;
 export const BATCH_PROGRESS_CONFIRMED = (mined: number): string =>
   `✅ ${mined} execution layer requests confirmed`;
 export const BATCH_PROGRESS_PENDING = (pending: number): string =>
@@ -300,6 +310,19 @@ export const SAFE_FEE_READ_FAILED_WARNING = (contractAddress: string): string =>
 export const SAFE_FEE_UNVALIDATED_PROMPT = 'Contract fee could not be validated. Choose an action:';
 export const SAFE_FEE_EXECUTE_ANYWAY_ACTION = 'Execute anyway (proceed without fee validation)';
 export const SAFE_FEE_ABORT_ACTION = 'Abort (exit and retry later)';
+
+/** Max fee constants */
+export const INVALID_MAX_FEE_FORMAT_ERROR =
+  'Invalid max fee format. Use format like 100gwei, 0.01eth, or 1wei';
+export const MAX_FEE_TOO_LOW_ERROR = 'Minimum max fee is 1 wei';
+export const MAX_FEE_WAITING_INFO = (
+  currentFee: bigint,
+  maxFee: bigint,
+  currentBlock: number
+): string =>
+  `Block ${currentBlock} | Current contract fee ${currentFee} wei exceeds max fee ${maxFee} wei — waiting for next block...`;
+export const MAX_FEE_EXPENSIVE_WARNING = (fee: bigint): string =>
+  `Warning: max fee of ${fee} wei (> 0.01 ETH) could get expensive — proceeding with requested value`;
 
 /** Fee tip logging */
 export const SAFE_FEE_TIP_INFO = (fee: bigint, tip: bigint, total: bigint): string =>

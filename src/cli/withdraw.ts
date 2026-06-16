@@ -8,7 +8,11 @@ import { Command } from 'commander';
 
 import type { GlobalCliOptions, WithdrawOptions } from '../model/commander';
 import { withdraw } from '../service/domain/withdraw';
-import { parseAndValidateValidatorPubKeys, parseAndValidateWithdrawAmount } from './validation/cli';
+import {
+  parseAndValidateValidatorPubKeys,
+  parseAndValidateWithdrawAmount,
+  resolveMaxFee
+} from './validation/cli';
 
 const withdrawCommand = new Command();
 
@@ -27,7 +31,12 @@ withdrawCommand
   )
   .action(async (options: WithdrawOptions, command) => {
     const globalOptions: GlobalCliOptions = command.parent.opts();
-    await withdraw(globalOptions, options.validator, options.amount);
+    await withdraw(
+      globalOptions,
+      options.validator,
+      options.amount,
+      resolveMaxFee(globalOptions.maxFee)
+    );
   });
 
 export { withdrawCommand };

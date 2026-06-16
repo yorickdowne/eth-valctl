@@ -127,7 +127,8 @@ describe('Domain Services Integration Tests', () => {
         mockSigner,
         expect.any(Array),
         options.maxRequestsPerBlock,
-        options.beaconApiUrl
+        options.beaconApiUrl,
+        1n
       );
     });
 
@@ -143,7 +144,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        expect.any(BigInt)
       );
     });
 
@@ -161,7 +163,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData1, expectedData2],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        expect.any(BigInt)
       );
     });
 
@@ -176,7 +179,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         expect.any(Array),
         5,
-        expect.any(String)
+        expect.any(String),
+        expect.any(BigInt)
       );
     });
 
@@ -247,7 +251,8 @@ describe('Domain Services Integration Tests', () => {
         mockSigner,
         expect.any(Array),
         options.maxRequestsPerBlock,
-        options.beaconApiUrl
+        options.beaconApiUrl,
+        1n
       );
     });
 
@@ -264,7 +269,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        1n
       );
     });
 
@@ -280,7 +286,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        1n
       );
     });
 
@@ -297,7 +304,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        1n
       );
     });
 
@@ -316,7 +324,8 @@ describe('Domain Services Integration Tests', () => {
           expect.stringContaining('ef'.repeat(48))
         ]),
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        1n
       );
     });
 
@@ -348,7 +357,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        1n
       );
     });
 
@@ -380,7 +390,8 @@ describe('Domain Services Integration Tests', () => {
           expect.stringContaining('ef'.repeat(48))
         ]),
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        1n
       );
     });
 
@@ -422,7 +433,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        expect.any(BigInt)
       );
     });
 
@@ -440,7 +452,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        expect.any(BigInt)
       );
     });
 
@@ -468,7 +481,8 @@ describe('Domain Services Integration Tests', () => {
         expect.anything(),
         [expectedData1, expectedData2],
         expect.any(Number),
-        expect.any(String)
+        expect.any(String),
+        expect.any(BigInt)
       );
     });
 
@@ -502,7 +516,8 @@ describe('Domain Services Integration Tests', () => {
           expect.anything(),
           expect.any(Array),
           expect.any(Number),
-          expect.any(String)
+          expect.any(String),
+          expect.any(BigInt)
         );
       });
     }

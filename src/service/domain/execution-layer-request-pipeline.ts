@@ -1,6 +1,10 @@
 import chalk from 'chalk';
 
-import { DEFAULT_SAFE_FEE_TIP, OWNER_LABEL_SAFE } from '../../constants/application';
+import {
+  DEFAULT_MAX_FEE,
+  DEFAULT_SAFE_FEE_TIP,
+  OWNER_LABEL_SAFE
+} from '../../constants/application';
 import { SAFE_FEE_TIP_INFO } from '../../constants/logging';
 import type { GlobalCliOptions } from '../../model/commander';
 import type { NetworkConfig } from '../../model/ethereum';
@@ -35,6 +39,8 @@ interface PipelineConfig {
   resolveContractAddress: ContractAddressResolver;
   /** Optional pre-request validation using the owner address for ownership checks */
   validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>;
+  /** Maximum contract fee in wei per request (waits indefinitely if exceeded) */
+  maxFee?: bigint;
 }
 
 /**
@@ -61,12 +67,19 @@ export async function executeRequestPipeline(config: PipelineConfig): Promise<vo
       contractAddress,
       requestData,
       config.validatorPubkeys,
-      config.validate
+      config.validate,
+      config.maxFee
     );
     return;
   }
 
-  await executeDirectPipeline(config.globalOptions, contractAddress, requestData, config.validate);
+  await executeDirectPipeline(
+    config.globalOptions,
+    contractAddress,
+    requestData,
+    config.validate,
+    config.maxFee
+  );
 }
 
 /**
@@ -84,7 +97,8 @@ async function executeDirectPipeline(
   globalOptions: GlobalCliOptions,
   contractAddress: string,
   requestData: string[],
-  validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>
+  validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>,
+  maxFee?: bigint
 ): Promise<void> {
   const signerType = globalOptions.ledger ? 'ledger' : 'wallet';
   const ethereumConnection = await createEthereumConnection(globalOptions.jsonRpcUrl, signerType);
@@ -99,7 +113,8 @@ async function executeDirectPipeline(
     ethereumConnection.signer,
     requestData,
     globalOptions.maxRequestsPerBlock,
-    globalOptions.beaconApiUrl
+    globalOptions.beaconApiUrl,
+    maxFee
   );
 }
 
@@ -123,7 +138,8 @@ async function executeSafePipeline(
   contractAddress: string,
   requestData: string[],
   validatorPubkeys: string[],
-  validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>
+  validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>,
+  maxFee?: bigint
 ): Promise<void> {
   const safeAddress = globalOptions.safe!;
   const safeInitResult = await initializeSafe(globalOptions, netConfig, safeAddress);
@@ -134,7 +150,8 @@ async function executeSafePipeline(
     }
 
     const stateService = new EthereumStateService(safeInitResult.provider, contractAddress);
-    const contractFee = await stateService.fetchContractFee();
+    const effectiveMaxFee = maxFee ?? DEFAULT_MAX_FEE;
+    const contractFee = await stateService.waitForContractFee(effectiveMaxFee);
     const safeFeeTip = BigInt(globalOptions.safeFeeTip ?? String(DEFAULT_SAFE_FEE_TIP));
     const proposalFee = contractFee + safeFeeTip;
 

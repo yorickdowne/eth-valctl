@@ -1,6 +1,6 @@
 import { parseUnits } from 'ethers';
 
-import { PREFIX_0x } from '../../constants/application';
+import { DEFAULT_MAX_FEE, PREFIX_0x } from '../../constants/application';
 import type { GlobalCliOptions } from '../../model/commander';
 import { executeRequestPipeline } from './execution-layer-request-pipeline';
 import {
@@ -14,14 +14,19 @@ import {
  * @param globalOptions - The global cli options
  * @param validatorPubkeys - The validator pubkey(s) from which the provided amount is withdrawn / which are exited
  * @param amount - The amount which will be withdrawn
+ * @param maxFee - Maximum contract fee per request in wei (numeric string, optional)
  */
 export async function withdraw(
   globalOptions: GlobalCliOptions,
   validatorPubkeys: string[],
-  amount: number
+  amount: number,
+  maxFee?: string
 ): Promise<void> {
+  const maxFeeBigInt = BigInt(maxFee ?? String(DEFAULT_MAX_FEE));
+
   await executeRequestPipeline({
     globalOptions,
+    maxFee: maxFeeBigInt,
     validatorPubkeys,
     encodeRequestData: (pubkey) => createWithdrawRequestData(pubkey, amount),
     resolveContractAddress: (config) => config.withdrawalContractAddress,

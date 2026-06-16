@@ -1,4 +1,4 @@
-import { PREFIX_0x } from '../../constants/application';
+import { DEFAULT_MAX_FEE, PREFIX_0x } from '../../constants/application';
 import type { GlobalCliOptions } from '../../model/commander';
 import { executeRequestPipeline } from './execution-layer-request-pipeline';
 import {
@@ -14,7 +14,8 @@ import {
  */
 export async function switchWithdrawalCredentialType(
   globalOptions: GlobalCliOptions,
-  sourceValidatorPubkeys: string[]
+  sourceValidatorPubkeys: string[],
+  maxFee?: string
 ): Promise<void> {
   const switchableValidators = await filterSwitchableValidators(
     globalOptions.beaconApiUrl,
@@ -25,8 +26,11 @@ export async function switchWithdrawalCredentialType(
     return;
   }
 
+  const maxFeeBigInt = BigInt(maxFee ?? String(DEFAULT_MAX_FEE));
+
   await executeRequestPipeline({
     globalOptions,
+    maxFee: maxFeeBigInt,
     validatorPubkeys: switchableValidators,
     encodeRequestData: createSwitchRequestData,
     resolveContractAddress: (config) => config.consolidationContractAddress,

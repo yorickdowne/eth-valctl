@@ -35,7 +35,9 @@ const MOCK_SAFE_INFO: SafeInfoResponse = {
   version: '1.4.1'
 };
 
-const mockProvider = {} as JsonRpcProvider;
+const mockProvider = {
+  getBlockNumber: () => Promise.resolve(12345)
+} as unknown as JsonRpcProvider;
 const mockSigner = {
   address: DIRECT_SIGNER_ADDRESS,
   dispose: mock(() => Promise.resolve())
@@ -87,6 +89,7 @@ describe('executeRequestPipeline', () => {
   let proposeSafeTransactionsSpy: ReturnType<typeof spyOn>;
   let sendExecutionLayerRequestsSpy: ReturnType<typeof spyOn>;
   let fetchContractFeeSpy: ReturnType<typeof spyOn>;
+  let waitForContractFeeSpy: ReturnType<typeof spyOn>;
   let mockDispose: ReturnType<typeof mock>;
 
   beforeEach(() => {
@@ -130,6 +133,11 @@ describe('executeRequestPipeline', () => {
       'fetchContractFee'
     ).mockImplementation(() => Promise.resolve(CONTRACT_FEE));
     fetchContractFeeSpy.mockClear();
+
+    waitForContractFeeSpy = spyOn(
+      ethereumStateServiceModule.EthereumStateService.prototype,
+      'waitForContractFee'
+    ).mockImplementation(() => Promise.resolve(CONTRACT_FEE));
   });
 
   afterEach(() => {
@@ -187,7 +195,8 @@ describe('executeRequestPipeline', () => {
         mockSigner,
         ['data:0xaaa', 'data:0xbbb'],
         5,
-        'http://b:1'
+        'http://b:1',
+        undefined
       );
     });
 
@@ -352,6 +361,7 @@ describe('executeRequestPipeline', () => {
 
     it('disposes safe init result when fee fetch throws', async () => {
       const options = buildGlobalOptions({ safe: SAFE_ADDRESS });
+      waitForContractFeeSpy.mockRestore();
       fetchContractFeeSpy.mockImplementationOnce(() =>
         Promise.reject(new Error('fee fetch failed'))
       );

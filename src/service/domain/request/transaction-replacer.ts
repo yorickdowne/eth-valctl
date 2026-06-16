@@ -1,4 +1,4 @@
-import type { TransactionResponse } from 'ethers';
+import { formatUnits, type TransactionResponse } from 'ethers';
 
 import * as serviceConstants from '../../../constants/application';
 import type {
@@ -76,7 +76,14 @@ export class TransactionReplacer {
 
     const needsReplacement = categorized.pending.length + categorized.reverted.length;
     if (needsReplacement > 0) {
-      this.logger.logBlockChangeReplacement(currentBlockNumber + 1, needsReplacement);
+      const maxFeePerGasGwei = formatUnits(maxNetworkFees.maxFeePerGas, 'gwei');
+      const contractFeeDisplay = TransactionProgressLogger.formatFeeForDisplay(newContractFee);
+      this.logger.logBlockChangeReplacement(
+        currentBlockNumber + 1,
+        needsReplacement,
+        maxFeePerGasGwei,
+        contractFeeDisplay
+      );
     }
 
     const revertedResults = await this.processRevertedTransactions(

@@ -4,6 +4,7 @@ import { JsonRpcProvider, toBeHex, toBigInt } from 'ethers';
 import * as serviceConstants from '../../../constants/application';
 import {
   FAILED_TO_FETCH_REQUIRED_FEE_ERROR,
+  MAX_FEE_WAITING_INFO,
   SYSTEM_CONTRACT_NOT_ACTIVATED_ERROR
 } from '../../../constants/logging';
 import type { ContractFeeState, MaxNetworkFees } from '../../../model/ethereum';
@@ -86,6 +87,45 @@ export class EthereumStateService {
         error
       );
       throw new BlockchainStateError('Unable to fetch contract fee from system contract', error);
+    }
+  }
+
+  /**
+   * Wait until the contract fee drops to or below the specified maximum
+   *
+   * Detects the next block by polling for a block number change (every 2s),
+   * then rechecks the fee. Logs current block number on each wait cycle.
+   *
+   * @param maxFee - Maximum acceptable contract fee in wei
+   * @returns The current contract fee once it is within the acceptable range
+   */
+  async waitForContractFee(maxFee: bigint): Promise<bigint> {
+    let currentBlock = await this.fetchBlockNumber();
+    while (true) {
+      const fee = await this.fetchContractFee();
+      if (fee <= maxFee) return fee;
+      console.error(chalk.yellow(MAX_FEE_WAITING_INFO(fee, maxFee, currentBlock)));
+
+      currentBlock = await this.waitForNextBlock(currentBlock);
+    }
+  }
+
+  /**
+   * Wait for the block number to advance past the given block
+   *
+   * Polls every BLOCK_CHANGE_POLL_INTERVAL_MS until a new block is detected.
+   *
+   * @param block - The current block number to advance past
+   * @returns The new block number
+   * @throws BlockchainStateError if unable to fetch block number
+   */
+  private async waitForNextBlock(block: number): Promise<number> {
+    while (true) {
+      await new Promise((resolve) =>
+        setTimeout(resolve, serviceConstants.TRANSACTION_RECEIPT_POLL_INTERVAL_MS)
+      );
+      const newBlock = await this.fetchBlockNumber();
+      if (newBlock !== block) return newBlock;
     }
   }
 
