@@ -41,7 +41,8 @@ export class TransactionBatchOrchestrator {
     private readonly transactionMonitor: TransactionMonitor,
     private readonly transactionReplacer: TransactionReplacer,
     private readonly logger: TransactionProgressLogger,
-    private readonly maxFee?: bigint
+    private readonly maxFee?: bigint,
+    private readonly maxFeePerGasCap?: bigint
   ) {}
 
   /**
@@ -123,6 +124,7 @@ export class TransactionBatchOrchestrator {
   private async processBatch(batch: string[]): Promise<BatchProcessingResult> {
     const currentBlockNumber = await this.blockchainStateService.fetchBlockNumber();
     const contractFee = await this.fetchContractFeeWithinMax();
+    await this.fetchMaxFeePerGasWithinCap();
     const broadcastResults = await this.transactionBroadcaster.broadcastExecutionLayerRequests(
       batch,
       contractFee,
@@ -282,6 +284,7 @@ export class TransactionBatchOrchestrator {
 
     try {
       const newContractFee = await this.fetchContractFeeWithinMax();
+      await this.fetchMaxFeePerGasWithinCap();
       const replacerResult = await this.transactionReplacer.replaceTransactions(
         unresolvedTransactions,
         newContractFee,
@@ -391,5 +394,17 @@ export class TransactionBatchOrchestrator {
       return this.blockchainStateService.fetchContractFee();
     }
     return this.blockchainStateService.waitForContractFee(this.maxFee);
+  }
+
+  /**
+   * Fetch and check the current gas fee, waiting for it to be within the cap
+   *
+   * If maxFeePerGasCap is not set, returns immediately.
+   * Otherwise waits up to 32 blocks for the gas fee to drop to or below the cap.
+   */
+  private async fetchMaxFeePerGasWithinCap(): Promise<void> {
+    if (this.maxFeePerGasCap !== undefined) {
+      await this.blockchainStateService.waitForMaxFeePerGas(this.maxFeePerGasCap);
+    }
   }
 }

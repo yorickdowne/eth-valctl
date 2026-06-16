@@ -1,4 +1,4 @@
-import { DEFAULT_MAX_FEE, PREFIX_0x } from '../../constants/application';
+import { DEFAULT_MAX_FEE, DEFAULT_MAX_FEE_PER_GAS, PREFIX_0x } from '../../constants/application';
 import type { GlobalCliOptions } from '../../model/commander';
 import { executeRequestPipeline } from './execution-layer-request-pipeline';
 import {
@@ -11,11 +11,14 @@ import {
  *
  * @param globalOptions - The global cli options
  * @param sourceValidatorPubkeys - The validator pubkey(s) for which the withdrawal credential type will be changed to 0x02
+ * @param maxFee - Maximum contract fee per request in wei (numeric string, optional)
+ * @param maxFeePerGas - Maximum gas fee per gas in wei (numeric string, optional)
  */
 export async function switchWithdrawalCredentialType(
   globalOptions: GlobalCliOptions,
   sourceValidatorPubkeys: string[],
-  maxFee?: string
+  maxFee?: string,
+  maxFeePerGas?: string
 ): Promise<void> {
   const switchableValidators = await filterSwitchableValidators(
     globalOptions.beaconApiUrl,
@@ -27,10 +30,12 @@ export async function switchWithdrawalCredentialType(
   }
 
   const maxFeeBigInt = BigInt(maxFee ?? String(DEFAULT_MAX_FEE));
+  const maxFeePerGasBigInt = BigInt(maxFeePerGas ?? String(DEFAULT_MAX_FEE_PER_GAS));
 
   await executeRequestPipeline({
     globalOptions,
     maxFee: maxFeeBigInt,
+    maxFeePerGasCap: maxFeePerGasBigInt,
     validatorPubkeys: switchableValidators,
     encodeRequestData: createSwitchRequestData,
     resolveContractAddress: (config) => config.consolidationContractAddress,

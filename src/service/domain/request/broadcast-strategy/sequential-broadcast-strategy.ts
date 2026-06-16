@@ -42,7 +42,8 @@ export class SequentialBroadcastStrategy implements IBroadcastStrategy {
     private readonly systemContractAddress: string,
     private readonly slotTimingService: ISlotTimingService,
     private readonly logger: TransactionProgressLogger,
-    private readonly maxFee?: bigint
+    private readonly maxFee?: bigint,
+    private readonly maxFeePerGasCap?: bigint
   ) {}
 
   /**
@@ -65,6 +66,18 @@ export class SequentialBroadcastStrategy implements IBroadcastStrategy {
       return this.blockchainStateService.fetchContractFee();
     }
     return this.blockchainStateService.waitForContractFee(this.maxFee);
+  }
+
+  /**
+   * Fetch and check the current gas fee, waiting for it to be within the cap
+   *
+   * If maxFeePerGasCap is not set, returns immediately.
+   * Otherwise waits up to 32 blocks for the gas fee to drop to or below the cap.
+   */
+  private async fetchMaxFeePerGasWithinCap(): Promise<void> {
+    if (this.maxFeePerGasCap !== undefined) {
+      await this.blockchainStateService.waitForMaxFeePerGas(this.maxFeePerGasCap);
+    }
   }
 
   /**
@@ -101,6 +114,7 @@ export class SequentialBroadcastStrategy implements IBroadcastStrategy {
 
       try {
         await this.slotTimingService.waitForOptimalBroadcastWindow();
+        await this.fetchMaxFeePerGasWithinCap();
         const freshContractFee = await this.fetchContractFeeWithinMax();
         const freshTransaction = createElTransaction(
           this.systemContractAddress,

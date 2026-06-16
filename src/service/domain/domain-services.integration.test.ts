@@ -128,7 +128,8 @@ describe('Domain Services Integration Tests', () => {
         expect.any(Array),
         options.maxRequestsPerBlock,
         options.beaconApiUrl,
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -145,7 +146,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        expect.any(BigInt)
+        expect.any(BigInt),
+        15000000000n
       );
     });
 
@@ -164,7 +166,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData1, expectedData2],
         expect.any(Number),
         expect.any(String),
-        expect.any(BigInt)
+        expect.any(BigInt),
+        15000000000n
       );
     });
 
@@ -180,7 +183,8 @@ describe('Domain Services Integration Tests', () => {
         expect.any(Array),
         5,
         expect.any(String),
-        expect.any(BigInt)
+        expect.any(BigInt),
+        15000000000n
       );
     });
 
@@ -252,7 +256,8 @@ describe('Domain Services Integration Tests', () => {
         expect.any(Array),
         options.maxRequestsPerBlock,
         options.beaconApiUrl,
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -270,7 +275,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -287,7 +293,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -305,7 +312,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -325,7 +333,8 @@ describe('Domain Services Integration Tests', () => {
         ]),
         expect.any(Number),
         expect.any(String),
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -358,7 +367,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -391,7 +401,8 @@ describe('Domain Services Integration Tests', () => {
         ]),
         expect.any(Number),
         expect.any(String),
-        1n
+        1n,
+        15000000000n
       );
     });
 
@@ -434,7 +445,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        expect.any(BigInt)
+        expect.any(BigInt),
+        15000000000n
       );
     });
 
@@ -453,7 +465,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData],
         expect.any(Number),
         expect.any(String),
-        expect.any(BigInt)
+        expect.any(BigInt),
+        15000000000n
       );
     });
 
@@ -482,7 +495,8 @@ describe('Domain Services Integration Tests', () => {
         [expectedData1, expectedData2],
         expect.any(Number),
         expect.any(String),
-        expect.any(BigInt)
+        expect.any(BigInt),
+        15000000000n
       );
     });
 
@@ -517,7 +531,8 @@ describe('Domain Services Integration Tests', () => {
           expect.any(Array),
           expect.any(Number),
           expect.any(String),
-          expect.any(BigInt)
+          expect.any(BigInt),
+          15000000000n
         );
       });
     }

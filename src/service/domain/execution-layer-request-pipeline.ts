@@ -2,6 +2,7 @@ import chalk from 'chalk';
 
 import {
   DEFAULT_MAX_FEE,
+  DEFAULT_MAX_FEE_PER_GAS,
   DEFAULT_SAFE_FEE_TIP,
   OWNER_LABEL_SAFE
 } from '../../constants/application';
@@ -41,6 +42,8 @@ interface PipelineConfig {
   validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>;
   /** Maximum contract fee in wei per request (waits indefinitely if exceeded) */
   maxFee?: bigint;
+  /** Maximum gas fee per gas in wei (waits up to 32 blocks, then errors) */
+  maxFeePerGasCap?: bigint;
 }
 
 /**
@@ -78,7 +81,8 @@ export async function executeRequestPipeline(config: PipelineConfig): Promise<vo
     contractAddress,
     requestData,
     config.validate,
-    config.maxFee
+    config.maxFee,
+    config.maxFeePerGasCap
   );
 }
 
@@ -98,7 +102,8 @@ async function executeDirectPipeline(
   contractAddress: string,
   requestData: string[],
   validate?: (ownerAddress: string, ownerLabel?: string) => Promise<void>,
-  maxFee?: bigint
+  maxFee?: bigint,
+  maxFeePerGasCap?: bigint
 ): Promise<void> {
   const signerType = globalOptions.ledger ? 'ledger' : 'wallet';
   const ethereumConnection = await createEthereumConnection(globalOptions.jsonRpcUrl, signerType);
@@ -107,6 +112,8 @@ async function executeDirectPipeline(
     await validate(ethereumConnection.signer.address);
   }
 
+  const effectiveMaxFeePerGasCap = maxFeePerGasCap ?? DEFAULT_MAX_FEE_PER_GAS;
+
   await sendExecutionLayerRequests(
     contractAddress,
     ethereumConnection.provider,
@@ -114,7 +121,8 @@ async function executeDirectPipeline(
     requestData,
     globalOptions.maxRequestsPerBlock,
     globalOptions.beaconApiUrl,
-    maxFee
+    maxFee,
+    effectiveMaxFeePerGasCap
   );
 }
 

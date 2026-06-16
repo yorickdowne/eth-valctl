@@ -88,6 +88,12 @@ program
     parseAndValidateMaxFee,
     '1wei'
   )
+  .option(
+    '-g, --max-fee-per-gas <fee>',
+    'Maximum gas fee per gas unit (e.g. 15gwei, 0.001eth, 10000000000wei). Wait up to 32 blocks if exceeded, then error',
+    parseAndValidateMaxFee,
+    '15gwei'
+  )
   .hook('preAction', (thisCommand) => {
     console.log(chalk.yellow(DISCLAIMER_INFO));
     const globalOptions: GlobalCliOptions = thisCommand.opts();

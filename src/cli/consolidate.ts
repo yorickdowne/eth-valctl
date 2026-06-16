@@ -41,7 +41,8 @@ consolidateCommand
       options.source,
       options.target,
       options.skipTargetOwnershipCheck,
-      resolveMaxFee(globalOptions.maxFee)
+      resolveMaxFee(globalOptions.maxFee),
+      resolveMaxFee(globalOptions.maxFeePerGas)
     );
   });
 

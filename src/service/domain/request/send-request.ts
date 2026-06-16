@@ -16,6 +16,7 @@ import { createTransactionPipeline } from './execution-layer-request-factory';
  * @param executionLayerRequestBatchSize - Maximum number of requests per batch
  * @param beaconApiUrl - Beacon API URL for slot-aware broadcasting (required for Ledger)
  * @param maxFee - Maximum contract fee in wei per request (waits if exceeded)
+ * @param maxFeePerGasCap - Maximum gas fee per gas in wei (waits up to 32 blocks, then errors)
  */
 export async function sendExecutionLayerRequests(
   systemContractAddress: string,
@@ -24,14 +25,16 @@ export async function sendExecutionLayerRequests(
   requestData: string[],
   executionLayerRequestBatchSize: number,
   beaconApiUrl: string,
-  maxFee?: bigint
+  maxFee?: bigint,
+  maxFeePerGasCap?: bigint
 ): Promise<void> {
   const pipeline = await createTransactionPipeline(
     systemContractAddress,
     jsonRpcProvider,
     signer,
     beaconApiUrl,
-    maxFee
+    maxFee,
+    maxFeePerGasCap
   );
 
   try {

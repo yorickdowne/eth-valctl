@@ -25,7 +25,8 @@ switchWithdrawalCredentialTypeCommand
     await switchWithdrawalCredentialType(
       globalOptions,
       options.validator,
-      resolveMaxFee(globalOptions.maxFee)
+      resolveMaxFee(globalOptions.maxFee),
+      resolveMaxFee(globalOptions.maxFeePerGas)
     );
   });
 

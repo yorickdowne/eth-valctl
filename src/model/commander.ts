@@ -33,4 +33,5 @@ export interface GlobalCliOptions {
   safe?: string;
   safeFeeTip?: string;
   maxFee?: string;
+  maxFeePerGas?: string;
 }

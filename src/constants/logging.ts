@@ -324,6 +324,17 @@ export const MAX_FEE_WAITING_INFO = (
 export const MAX_FEE_EXPENSIVE_WARNING = (fee: bigint): string =>
   `Warning: max fee of ${fee} wei (> 0.01 ETH) could get expensive — proceeding with requested value`;
 
+/** Max fee per gas constants */
+export const MAX_FEE_PER_GAS_WAITING_INFO = (
+  currentFeeGwei: string,
+  maxFeeGwei: string,
+  currentBlock: number,
+  remainingBlocks: number
+): string =>
+  `Block ${currentBlock} | Gas fee ${currentFeeGwei} Gwei exceeds max ${maxFeeGwei} Gwei — waiting for next block (${remainingBlocks} blocks remaining)...`;
+export const MAX_FEE_PER_GAS_EXCEEDED_ERROR = (capGwei: string, maxBlocks: number): string =>
+  `Gas fee did not drop below ${capGwei} Gwei within ${maxBlocks} blocks. Re-run with a higher --max-fee-per-gas or try again later.`;
+
 /** Fee tip logging */
 export const SAFE_FEE_TIP_INFO = (fee: bigint, tip: bigint, total: bigint): string =>
   `Contract fee: ${fee} wei + ${tip} wei tip = ${total} wei per request`;

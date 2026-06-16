@@ -22,7 +22,12 @@ exitCommand
   )
   .action(async (options: ValidatorOption, command) => {
     const globalOptions: GlobalCliOptions = command.parent.opts();
-    await exit(globalOptions, options.validator, resolveMaxFee(globalOptions.maxFee));
+    await exit(
+      globalOptions,
+      options.validator,
+      resolveMaxFee(globalOptions.maxFee),
+      resolveMaxFee(globalOptions.maxFeePerGas)
+    );
   });
 
 export { exitCommand };

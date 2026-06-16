@@ -35,7 +35,8 @@ withdrawCommand
       globalOptions,
       options.validator,
       options.amount,
-      resolveMaxFee(globalOptions.maxFee)
+      resolveMaxFee(globalOptions.maxFee),
+      resolveMaxFee(globalOptions.maxFeePerGas)
     );
   });
 

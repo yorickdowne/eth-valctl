@@ -4,6 +4,7 @@ import type { JsonRpcProvider } from 'ethers';
 
 import {
   CONSOLIDATION_CONTRACT_ADDRESS,
+  DEFAULT_MAX_FEE_PER_GAS,
   DEFAULT_SAFE_FEE_TIP,
   OWNER_LABEL_SAFE,
   WITHDRAWAL_CONTRACT_ADDRESS
@@ -196,7 +197,8 @@ describe('executeRequestPipeline', () => {
         ['data:0xaaa', 'data:0xbbb'],
         5,
         'http://b:1',
-        undefined
+        undefined,
+        DEFAULT_MAX_FEE_PER_GAS
       );
     });
 
