@@ -351,14 +351,18 @@ export class TransactionProgressLogger {
    * @returns Formatted string with unit, e.g. "100 wei", "2.5 gwei", "0.01 ETH"
    */
   static formatFeeForDisplay(feeWei: bigint): string {
-    if (feeWei < 1_000_000n) return `${feeWei} wei`;
-    if (feeWei < 10_000_000_000_000_000_000n) {
-      const gwei = formatUnits(feeWei, 'gwei');
-      const num = Number(gwei);
-      if (num < 1) return `${num.toFixed(4)} gwei`;
-      if (num < 100) return `${num.toFixed(2)} gwei`;
-      return `${Math.round(num)} gwei`;
-    }
-    return `${formatEther(feeWei)} ETH`;
+    return formatFeeForDisplay(feeWei);
   }
+}
+
+export function formatFeeForDisplay(feeWei: bigint): string {
+  if (feeWei < 1_000_000n) return `${feeWei} wei`;
+  if (feeWei < 10_000_000_000_000_000_000n) {
+    const gwei = formatUnits(feeWei, 'gwei');
+    const num = Number(gwei);
+    if (num < 1) return `${num.toFixed(4)} gwei`;
+    if (num < 100) return `${num.toFixed(2)} gwei`;
+    return `${Math.round(num)} gwei`;
+  }
+  return `${formatEther(feeWei)} ETH`;
 }

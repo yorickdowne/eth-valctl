@@ -10,6 +10,7 @@ import {
   SYSTEM_CONTRACT_NOT_ACTIVATED_ERROR
 } from '../../../constants/logging';
 import type { ContractFeeState, MaxNetworkFees } from '../../../model/ethereum';
+import { TransactionProgressLogger } from './transaction-progress-logger';
 import { BlockchainStateError } from '../../../model/ethereum';
 
 /**
@@ -106,7 +107,15 @@ export class EthereumStateService {
     while (true) {
       const fee = await this.fetchContractFee();
       if (fee <= maxFee) return fee;
-      console.error(chalk.yellow(MAX_FEE_WAITING_INFO(fee, maxFee, currentBlock)));
+      console.error(
+        chalk.yellow(
+          MAX_FEE_WAITING_INFO(
+            TransactionProgressLogger.formatFeeForDisplay(fee),
+            TransactionProgressLogger.formatFeeForDisplay(maxFee),
+            currentBlock
+          )
+        )
+      );
 
       currentBlock = await this.waitForNextBlock(currentBlock);
     }

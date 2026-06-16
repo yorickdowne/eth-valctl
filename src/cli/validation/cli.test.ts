@@ -7,6 +7,7 @@ import { join } from 'path';
 import { MAX_NUMBER_OF_REQUESTS_PER_BLOCK } from '../../constants/application';
 import * as logging from '../../constants/logging';
 import { SAFE_OPTION_REQUIRED_ERROR } from '../../constants/logging';
+import { formatFeeForDisplay } from '../../service/domain/request/transaction-progress-logger';
 import type { GlobalCliOptions } from '../../model/commander';
 import {
   parseAndValidateMaxFee,
@@ -461,7 +462,7 @@ describe('CLI Validation', () => {
 
       expect(result).toBe('20000000000000000');
       expect(stderrSpy).toHaveBeenCalledWith(
-        chalk.yellow(logging.MAX_FEE_EXPENSIVE_WARNING(20000000000000000n))
+        chalk.yellow(logging.MAX_FEE_EXPENSIVE_WARNING(formatFeeForDisplay(20000000000000000n)))
       );
     });
 

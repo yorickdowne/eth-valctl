@@ -5,6 +5,7 @@ import { existsSync, readFileSync, statSync } from 'fs';
 
 import * as application from '../../constants/application';
 import * as logging from '../../constants/logging';
+import { formatFeeForDisplay } from '../../service/domain/request/transaction-progress-logger';
 import { SAFE_OPTION_REQUIRED_ERROR } from '../../constants/logging';
 import type { GlobalCliOptions } from '../../model/commander';
 import { networkConfig } from '../../network-config';
@@ -195,7 +196,7 @@ export function parseAndValidateMaxFee(value: string): string {
   }
 
   if (wei > application.MAX_FEE_EXPENSIVE_THRESHOLD) {
-    console.error(chalk.yellow(logging.MAX_FEE_EXPENSIVE_WARNING(wei)));
+    console.error(chalk.yellow(logging.MAX_FEE_EXPENSIVE_WARNING(formatFeeForDisplay(wei))));
   }
 
   return wei.toString();

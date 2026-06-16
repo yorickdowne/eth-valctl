@@ -316,13 +316,13 @@ export const INVALID_MAX_FEE_FORMAT_ERROR =
   'Invalid max fee format. Use format like 100gwei, 0.01eth, or 1wei';
 export const MAX_FEE_TOO_LOW_ERROR = 'Minimum max fee is 1 wei';
 export const MAX_FEE_WAITING_INFO = (
-  currentFee: bigint,
-  maxFee: bigint,
+  currentFeeDisplay: string,
+  maxFeeDisplay: string,
   currentBlock: number
 ): string =>
-  `Block ${currentBlock} | Current contract fee ${currentFee} wei exceeds max fee ${maxFee} wei — waiting for next block...`;
-export const MAX_FEE_EXPENSIVE_WARNING = (fee: bigint): string =>
-  `Warning: max fee of ${fee} wei (> 0.01 ETH) could get expensive — proceeding with requested value`;
+  `Block ${currentBlock} | Current contract fee ${currentFeeDisplay} exceeds max fee ${maxFeeDisplay} — waiting for next block...`;
+export const MAX_FEE_EXPENSIVE_WARNING = (feeDisplay: string): string =>
+  `Warning: max fee of ${feeDisplay} (> 0.01 ETH) could get expensive — proceeding with requested value`;
 
 /** Max fee per gas constants */
 export const MAX_FEE_PER_GAS_WAITING_INFO = (
